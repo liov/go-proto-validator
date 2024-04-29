@@ -2,10 +2,10 @@
 // See LICENSE for licensing terms.
 
 syntax = "proto3";
-package validatortest;
+package test;
+import "validator/validator.proto";
 
-import "github.com/gogo/protobuf/gogoproto/gogo.proto";
-import "github.com/mwitkow/go-proto-validators/validator.proto";
+option go_package = "github.com/liov/go-proto-validator/test";
 
 // Top-level enum type definition.
 enum EnumProto3 {
@@ -39,10 +39,10 @@ message ValidatorMessage3 {
 
 	// Embedded message existence and recursive constraint tests.
 	EmbeddedMessage someEmbedded = 10;
-	EmbeddedMessage someEmbeddedNonNullable = 11 [(gogoproto.nullable) = false];
+	EmbeddedMessage someEmbeddedNonNullable = 11 ;
 	EmbeddedMessage someEmbeddedExists = 12 [(validator.field) = {msg_exists : true}];
 	repeated EmbeddedMessage someEmbeddedRep = 14;
-	repeated EmbeddedMessage someEmbeddedRepNonNullable = 15 [(gogoproto.nullable) = false];
+	repeated EmbeddedMessage someEmbeddedRepNonNullable = 15 ;
 
 	// Custom error tests.
 	int32 CustomErrorInt = 16 [(validator.field) = {int_lt: 10, human_error: "My Custom Error"}];
@@ -89,5 +89,4 @@ message ValidatorMessage3 {
 	EnumProto3 someEnum = 44 [(validator.field) = {is_in_enum: true}];
 	EmbeddedEnum someEmbeddedEnum = 45 [(validator.field) = {is_in_enum: true}];
 
-	EmbeddedMessage someGogoEmbedded = 46 [(gogoproto.embed) = true, (gogoproto.nullable) = false, (gogoproto.jsontag) = ",inline"];
 }

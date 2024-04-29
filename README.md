@@ -7,18 +7,6 @@ A `protoc` plugin that generates `Validate() error` functions on Go proto `struc
 files. The validation functions are code-generated and thus don't suffer on performance from tag-based reflection on
 deeply-nested messages.
 
-## Requirements
-
-Using Protobuf validators is currently verified to work with:
-
-- Go 1.11, 1.12, 1.13
-- [Protobuf](https://github.com/protocolbuffers/protobuf) @ `v3.8.0`
-- [Go Protobuf](https://github.com/golang/protobuf) @ `v1.3.2`
-- [Gogo Protobuf](https://github.com/gogo/protobuf) @ `v1.3.0`
-
-It _should_ still be possible to use it in project using earlier Go versions. However if you want to contribute to this
-repository you'll need at least 1.11 for Go module support.
-
 ## Paint me a code picture
 
 Let's take the following `proto3` snippet:
@@ -26,7 +14,7 @@ Let's take the following `proto3` snippet:
 ```proto
 syntax = "proto3";
 package validator.examples;
-import "github.com/mwitkow/go-proto-validators/validator.proto";
+import "validator/validator.proto";
 
 message InnerMessage {
   // some_integer can only be in range (0, 100).
@@ -50,17 +38,17 @@ Second, the expected values in fields are now part of the contract `.proto` file
 Third, the generated code is understandable and has clear understandable error messages. Take a look:
 
 ```go
-func (this *InnerMessage) Validate() error {
-	if !(this.SomeInteger > 0) {
+func (x *InnerMessage) Validate() error {
+	if !(x.SomeInteger > 0) {
 		return fmt.Errorf("validation error: InnerMessage.SomeInteger must be greater than '0'")
 	}
-	if !(this.SomeInteger < 100) {
+	if !(x.SomeInteger < 100) {
 		return fmt.Errorf("validation error: InnerMessage.SomeInteger must be less than '100'")
 	}
-	if !(this.SomeFloat >= 0) {
+	if !(x.SomeFloat >= 0) {
 		return fmt.Errorf("validation error: InnerMessage.SomeFloat must be greater than or equal to '0'")
 	}
-	if !(this.SomeFloat <= 1) {
+	if !(x.SomeFloat <= 1) {
 		return fmt.Errorf("validation error: InnerMessage.SomeFloat must be less than or equal to '1'")
 	}
 	return nil
@@ -68,14 +56,14 @@ func (this *InnerMessage) Validate() error {
 
 var _regex_OuterMessage_ImportantString = regexp.MustCompile("^[a-z0-9]{5,30}$")
 
-func (this *OuterMessage) Validate() error {
-	if !_regex_OuterMessage_ImportantString.MatchString(this.ImportantString) {
+func (x *OuterMessage) Validate() error {
+	if !_regex_OuterMessage_ImportantString.MatchString(x.ImportantString) {
 		return fmt.Errorf("validation error: OuterMessage.ImportantString must conform to regex '^[a-z0-9]{5,30}$'")
 	}
-	if nil == this.Inner {
+	if nil == x.Inner {
 		return fmt.Errorf("validation error: OuterMessage.Inner message must exist")
 	}
-	if this.Inner != nil {
+	if x.Inner != nil {
 		if err := validators.CallValidatorIfExists(this.Inner); err != nil {
 			return err
 		}
@@ -95,21 +83,10 @@ export PATH=${PATH}:${GOPATH}/bin
 Then, do the usual
 
 ```sh
-go get github.com/mwitkow/go-proto-validators/protoc-gen-govalidators
+go get github.com/liov/go-proto-validator/cmd/protoc-gen-validator
 ```
 
 Your `protoc` builds probably look very simple like:
-
-```sh
-protoc  \
-  --proto_path=. \
-  --go_out=. \
-  *.proto
-```
-
-That's fine, until you encounter `.proto` includes. Because `go-proto-validators` uses field options inside the `.proto` 
-files themselves, it's `.proto` definition (and the Google `descriptor.proto` itself) need to on the `protoc` include
-path. Hence the above becomes:
 
 ```sh
 protoc  \
@@ -117,25 +94,14 @@ protoc  \
   --proto_path=${GOPATH}/src/github.com/google/protobuf/src \
   --proto_path=. \
   --go_out=. \
-  --govalidators_out=. \
+  --validator_out=. \
   *.proto
 ```
 
-Or with gogo protobufs:
 
-```sh
-protoc  \
-  --proto_path=${GOPATH}/src \
-  --proto_path=${GOPATH}/src/github.com/gogo/protobuf/protobuf \
-  --proto_path=. \
-  --gogo_out=. \
-  --govalidators_out=gogoimport=true:. \
-  *.proto
-```
-
-Basically the magical incantation (apart from includes) is the `--govalidators_out`. That triggers the 
-`protoc-gen-govalidators` plugin to generate `mymessage.validator.pb.go`. That's it :)
+Basically the magical incantation (apart from includes) is the `--validator_out`. That triggers the 
+`protoc-gen-govalidator` plugin to generate `mymessage.validator.pb.go`. That's it :)
 
 ## License
 
-`go-proto-validators` is released under the Apache 2.0 license. See the [LICENSE](LICENSE) file for details.
+`go-proto-validator` is released under the Apache 2.0 license. See the [LICENSE](LICENSE) file for details.

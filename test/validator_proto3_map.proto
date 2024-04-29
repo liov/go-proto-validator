@@ -2,7 +2,10 @@
 // See LICENSE for licensing terms.
 
 syntax = "proto3";
-package validatortest;
+package test;
+import "validator/validator.proto";
+
+option go_package = "github.com/liov/go-proto-validator/test";
 
 message ValueType {
   string something  = 1 ;

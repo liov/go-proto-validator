@@ -2,9 +2,10 @@
 // See LICENSE for licensing terms.
 
 syntax = "proto3";
-package validatortest;
+package test;
+import "validator/validator.proto";
 
-import "github.com/mwitkow/go-proto-validators/validator.proto";
+option go_package = "github.com/liov/go-proto-validator/test";
 
 message ExternalMsg {
   string Identifier = 1 [(validator.field) = {regex: "^[a-z]{2,5}$"}];
