@@ -90,8 +90,6 @@ Your `protoc` builds probably look very simple like:
 
 ```sh
 protoc  \
-  --proto_path=${GOPATH}/src \
-  --proto_path=${GOPATH}/src/github.com/google/protobuf/src \
   --proto_path=. \
   --go_out=. \
   --validator_out=. \
